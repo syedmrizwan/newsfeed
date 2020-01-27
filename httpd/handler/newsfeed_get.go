@@ -17,7 +17,7 @@ func NewsfeedGet(feed newsfeed.Getter) gin.HandlerFunc {
 	}
 }
 
-func GetBitcoinNews() gin.HandlerFunc {
+func GetBitcoinAndSportsNews() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		resp, err := util.AsyncHTTP([]string{"bitcoin", "sports"})
 		if err != nil {
@@ -25,20 +25,5 @@ func GetBitcoinNews() gin.HandlerFunc {
 		}
 		fmt.Println(resp)
 		c.JSON(http.StatusOK, resp)
-		// url := "https://newsapi.org/v2/everything"
-		// params := map[string]string{
-		// 	"q":      "bitcoin",
-		// 	"from":   "2020-1-15",
-		// 	"sortBy": "publishedAt",
-		// 	"apiKey": "e4d1a5d882eb439ea2471a6d9948ac1c"}
-		// client := resty.New()
-		// client.SetQueryParams(params)
-		// resp, err := client.R().Get(url)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	c.JSON(400, "Bad request")
-		// 	return
-		// }
-		//c.Data(http.StatusOK, "application/json", resp.Body())
 	}
 }

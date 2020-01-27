@@ -8,10 +8,10 @@ import (
 	"sync"
 )
 
-const Google_News_URL = "https://newsapi.org/v2/everything"
+const NewsURL = "https://newsapi.org/v2/everything"
 
-func AsyncHTTP(queries []string) (map[string]string, error) {
-	ch := make(chan map[string]string)
+func AsyncHTTP(queries []string) (map[string][]string, error) {
+	ch := make(chan map[string][]string)
 	var wg sync.WaitGroup
 	for _, query := range queries {
 		wg.Add(1)
@@ -23,7 +23,7 @@ func AsyncHTTP(queries []string) (map[string]string, error) {
 		close(ch)
 	}()
 
-	responses := make(map[string]string)
+	responses := make(map[string][]string)
 	for mapString := range ch {
 		for k, v := range mapString {
 			responses[k] = v
@@ -33,26 +33,25 @@ func AsyncHTTP(queries []string) (map[string]string, error) {
 	return responses, nil
 }
 
-func executeHttpRequest(query string, ch chan<- map[string]string, wg *sync.WaitGroup) {
+func executeHttpRequest(query string, ch chan<- map[string][]string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	params := map[string]string{
 		"q":      query,
 		"from":   "2020-1-15",
 		"sortBy": "publishedAt",
 		"apiKey": "e4d1a5d882eb439ea2471a6d9948ac1c"}
-	resp, err := GetResponse(Google_News_URL, params)
+	resp, err := GetResponse(NewsURL, params)
 	if err != nil {
 		log.Println("Error occured")
 	}
-	m := make(map[string]string)
-	articles := gjson.Get(string(resp), `articles`)
-	m[query] = articles.String()
+	var articleTitles []string
+	m := make(map[string][]string)
+	articles := gjson.Get(string(resp), `articles.#.title`)
+	for _, name := range articles.Array() {
+		articleTitles = append(articleTitles, name.String())
+	}
+	m[query] = articleTitles
 	ch <- m
-
-	// metricValue := gjson.Get(string(resp), `data.result.0.value.1`)
-	// m := make(map[string]string)
-	// m[metricName.String()] = metricValue.String()
-	// ch <- m
 }
 
 func GetResponse(url string, params map[string]string) ([]byte, error) {

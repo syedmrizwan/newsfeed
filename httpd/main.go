@@ -13,7 +13,7 @@ func main() {
 
 	r.GET("/ping", handler.PingGet())
 	r.GET("/newsfeed", handler.NewsfeedGet(feed))
-	r.GET("/bitcoinnews", handler.GetBitcoinNews())
+	r.GET("/bitcoinnews", handler.GetBitcoinAndSportsNews())
 	r.POST("/newsfeed", handler.NewsfeedPost(feed))
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
