@@ -27,3 +27,14 @@ func GetBitcoinAndSportsNews() gin.HandlerFunc {
 		c.JSON(http.StatusOK, resp)
 	}
 }
+
+func GetSportsNews() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		resp, err := util.GetURLResponse("sports")
+		if err != nil {
+			c.JSON(400, "Bad request")
+		}
+		fmt.Println(resp)
+		c.Data(http.StatusOK, "application/json", resp)
+	}
+}

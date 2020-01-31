@@ -2,10 +2,14 @@ package util
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
+	"sync"
+
 	"github.com/go-resty/resty/v2"
 	"github.com/tidwall/gjson"
-	"log"
-	"sync"
 )
 
 const NewsURL = "https://newsapi.org/v2/everything"
@@ -63,4 +67,22 @@ func GetResponse(url string, params map[string]string) ([]byte, error) {
 		return nil, err
 	}
 	return resp.Body(), nil
+}
+
+func GetURLResponse(query string) ([]byte, error) {
+	u, _ := url.Parse(NewsURL)
+	q, _ := url.ParseQuery(u.RawQuery)
+	q.Add("q", query)
+	q.Add("from", "2020-1-20")
+	q.Add("sortBy", "publishedAt")
+	q.Add("apiKey", "e4d1a5d882eb439ea2471a6d9948ac1c")
+	u.RawQuery = q.Encode()
+	resp, err := http.Get(u.String())
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	b, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	return b, nil
 }
