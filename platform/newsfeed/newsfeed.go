@@ -7,8 +7,9 @@ type Adder interface {
 	Add(item Item)
 }
 type Item struct {
-	Title string `json:"title"`
-	Post  string `json:"post"`
+	tableName struct{} `pg:"item"`
+	Title     string   `json:"title", pg:"title"`
+	Post      string   `json:"post", pg:"post"`
 }
 
 type Repo struct {
