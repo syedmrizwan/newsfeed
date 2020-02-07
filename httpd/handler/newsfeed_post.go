@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"newsfeeder/database"
 	"newsfeeder/platform/newsfeed"
 
 	"github.com/gin-gonic/gin"
@@ -14,14 +15,20 @@ type newsfeedPostRequest struct {
 
 func NewsfeedPost(feed newsfeed.Adder) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		db := database.GetConnection()
+
 		requestBody := newsfeedPostRequest{}
 		c.Bind(&requestBody)
 
-		item := newsfeed.Item{
+		item := &newsfeed.Item{
 			Title: requestBody.Title,
 			Post:  requestBody.Post,
 		}
-		feed.Add(item)
+		err := db.Insert(item)
+		if err != nil {
+			panic(err)
+		}
+		// feed.Add(item)
 		c.Status(http.StatusNoContent)
 	}
 

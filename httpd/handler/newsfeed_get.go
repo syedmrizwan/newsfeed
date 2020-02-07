@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"newsfeeder/database"
 	"newsfeeder/platform/newsfeed"
 	"newsfeeder/util"
 
@@ -12,8 +13,13 @@ import (
 
 func NewsfeedGet(feed newsfeed.Getter) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		results := feed.GetAll()
-		c.JSON(http.StatusOK, results)
+		db := database.GetConnection()
+		var items []newsfeed.Item
+		if err := db.Model(&items).Select(); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, items)
 	}
 }
 

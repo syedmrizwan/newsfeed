@@ -1,0 +1,37 @@
+version: '3.1'
+
+volumes:
+  postgres_data: {}
+
+services:
+  newsfeeder:
+    build: .
+    environment:
+      - DB_NAME=newsfeeder
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - DB_HOST=127.0.0.1
+      - DB_PORT=5432
+      - DB_POOL_SIZE=10
+      - BUILD_ENV=dev
+      - SERVER_PORT=8080
+    depends_on:
+     - postgres_server
+    ports:
+     - 8080:8080
+    network_mode: 'host'
+
+
+  postgres_server:
+    image: postgres:12
+    container_name: postgres-server
+    environment:
+      - "POSTGRES_USER=root"
+      - "POSTGRES_DB=newsfeeder"
+      - "POSTGRES_PASSWORD=root"
+    volumes:
+     - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    network_mode: 'host'
+
