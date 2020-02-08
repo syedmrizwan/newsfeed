@@ -11,7 +11,6 @@ func main() {
 	feed := newsfeed.New()
 	r := gin.Default()
 
-	r.GET("/ping", handler.PingGet())
 	r.GET("/newsfeed", handler.NewsfeedGet(feed))
 	r.GET("/bitcoinnews", handler.GetBitcoinAndSportsNews())
 	r.GET("/sportsnews", handler.GetSportsNews())

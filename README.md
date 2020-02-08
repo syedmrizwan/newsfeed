@@ -7,6 +7,13 @@ Newsfeeder is a project to demonstrate REST API in Go using the Gin web framewor
 
 `make dev`
 
+## Running the container
+
+```
+cd newsfeeder
+docker-compose up -d
+```
+
 ## Testing
 
 Run test from a particular package
