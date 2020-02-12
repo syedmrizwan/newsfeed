@@ -1,8 +1,10 @@
 package database
 
 import (
-	"github.com/go-pg/pg/v9"
 	"newsfeeder/env"
+	"newsfeeder/platform/newsfeed"
+
+	"github.com/go-pg/pg/v9"
 )
 
 var db *pg.DB
@@ -16,8 +18,10 @@ func init() {
 		Database: env.Env.DbName,
 		PoolSize: env.Env.DbPoolSize,
 	})
+	newsfeed.CreateItemTable(db)
 }
 
+// GetConnection returns pg connection
 func GetConnection() *pg.DB {
 	return db
 }
