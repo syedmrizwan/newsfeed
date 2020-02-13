@@ -1,11 +1,13 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"newsfeeder/database"
 	"newsfeeder/platform/newsfeed"
 	"newsfeeder/util"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	// "github.com/tidwall/gjson"
@@ -36,7 +38,13 @@ func GetBitcoinAndSportsNews() gin.HandlerFunc {
 
 func GetSportsNews() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		resp, err := util.GetURLResponse("sports")
+
+		// Create a new context
+		// With a deadline of 100 milliseconds
+		ctx := context.Background()
+		ctx, _ = context.WithTimeout(ctx, 10*time.Second)
+
+		resp, err := util.GetURLResponse(ctx, "sports")
 		if err != nil {
 			c.JSON(400, "Bad request")
 		}

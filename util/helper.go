@@ -1,6 +1,7 @@
 package util
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -69,7 +70,7 @@ func GetResponse(url string, params map[string]string) ([]byte, error) {
 	return resp.Body(), nil
 }
 
-func GetURLResponse(query string) ([]byte, error) {
+func GetURLResponse(ctx context.Context, query string) ([]byte, error) {
 	u, _ := url.Parse(NewsURL)
 	q, _ := url.ParseQuery(u.RawQuery)
 	q.Add("q", query)
@@ -77,9 +78,18 @@ func GetURLResponse(query string) ([]byte, error) {
 	q.Add("sortBy", "publishedAt")
 	q.Add("apiKey", "e4d1a5d882eb439ea2471a6d9948ac1c")
 	u.RawQuery = q.Encode()
-	resp, err := http.Get(u.String())
+
+	// Make a request, that will call the google homepage
+	req, _ := http.NewRequest(http.MethodGet, u.String(), nil)
+	// Associate the cancellable context we just created to the request
+	req = req.WithContext(ctx)
+
+	// Create a new HTTP client and execute the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	// If the request failed, log to STDOUT
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Request failed:", err)
 		return nil, err
 	}
 	b, err := ioutil.ReadAll(resp.Body)
