@@ -7,45 +7,42 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"sync"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/tidwall/gjson"
 )
 
+// NewsURL is the the URL for newsapi
 const NewsURL = "https://newsapi.org/v2/everything"
 
+// AsyncHTTP executes http request in an asynchronous manner
 func AsyncHTTP(queries []string) (map[string][]string, error) {
 	ch := make(chan map[string][]string)
-	var wg sync.WaitGroup
+	defer close(ch)
 	for _, query := range queries {
-		wg.Add(1)
-		go executeHttpRequest(query, ch, &wg)
+		go func(query string, ch chan map[string][]string) {
+			executeHTTPRequest(query, ch)
+		}(query, ch)
 	}
 
-	go func() {
-		wg.Wait()
-		close(ch)
-	}()
-
 	responses := make(map[string][]string)
-	for mapString := range ch {
+
+	for i := 0; i < len(queries); i++ {
+		mapString := <-ch
 		for k, v := range mapString {
 			responses[k] = v
-			fmt.Println(mapString)
 		}
 	}
 	return responses, nil
 }
 
-func executeHttpRequest(query string, ch chan<- map[string][]string, wg *sync.WaitGroup) {
-	defer wg.Done()
+func executeHTTPRequest(query string, ch chan map[string][]string) {
 	params := map[string]string{
 		"q":      query,
-		"from":   "2020-1-15",
+		"from":   "2020-2-10",
 		"sortBy": "publishedAt",
 		"apiKey": "e4d1a5d882eb439ea2471a6d9948ac1c"}
-	resp, err := GetResponse(NewsURL, params)
+	resp, err := getResponse(NewsURL, params)
 	if err != nil {
 		log.Println("Error occured")
 	}
@@ -59,7 +56,7 @@ func executeHttpRequest(query string, ch chan<- map[string][]string, wg *sync.Wa
 	ch <- m
 }
 
-func GetResponse(url string, params map[string]string) ([]byte, error) {
+func getResponse(url string, params map[string]string) ([]byte, error) {
 	client := resty.New()
 	client.SetQueryParams(params)
 	resp, err := client.R().Get(url)
@@ -70,6 +67,7 @@ func GetResponse(url string, params map[string]string) ([]byte, error) {
 	return resp.Body(), nil
 }
 
+// GetURLResponse takes a query as parameter and returns its response by using newsapi URL
 func GetURLResponse(ctx context.Context, query string) ([]byte, error) {
 	u, _ := url.Parse(NewsURL)
 	q, _ := url.ParseQuery(u.RawQuery)
