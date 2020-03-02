@@ -16,8 +16,10 @@ import (
 const NewsURL = "https://newsapi.org/v2/everything"
 
 // AsyncHTTP executes http request in an asynchronous manner
+// Signal With Data - No Guarantee - Buffered Channels >1
+// Fan Out
 func AsyncHTTP(queries []string) (map[string][]string, error) {
-	ch := make(chan map[string][]string)
+	ch := make(chan map[string][]string, len(queries))
 	defer close(ch)
 	for _, query := range queries {
 		go func(query string, ch chan map[string][]string) {
@@ -53,7 +55,13 @@ func executeHTTPRequest(query string, ch chan map[string][]string) {
 		articleTitles = append(articleTitles, name.String())
 	}
 	m[query] = articleTitles
-	ch <- m
+	select {
+	case ch <- m:
+		fmt.Println("manager : send ack")
+	default:
+		fmt.Println("manager : drop")
+	}
+
 }
 
 func getResponse(url string, params map[string]string) ([]byte, error) {
