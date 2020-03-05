@@ -64,7 +64,7 @@ func SetUpAuth() (*jwt.GinJWTMiddleware, error) {
 			if err2 := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err2 != nil {
 				return nil, jwt.ErrFailedAuthentication
 			}
-			return &user, nil
+			return user, nil
 		},
 		Authorizator: func(data interface{}, c *gin.Context) bool {
 			if v, ok := data.(*model.User); ok && v.UserName == "admin" {
