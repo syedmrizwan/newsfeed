@@ -1,10 +1,13 @@
 package middleware
 
 import (
+	"newsfeeder/database"
+	"newsfeeder/model"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var identityKey = "id"
@@ -15,11 +18,11 @@ type login struct {
 }
 
 // User demo
-type User struct {
-	UserName  string
-	FirstName string
-	LastName  string
-}
+// type User struct {
+// 	UserName  string
+// 	FirstName string
+// 	LastName  string
+// }
 
 func SetUpAuth() (*jwt.GinJWTMiddleware, error) {
 	// the jwt middleware
@@ -30,7 +33,7 @@ func SetUpAuth() (*jwt.GinJWTMiddleware, error) {
 		MaxRefresh:  time.Hour,
 		IdentityKey: identityKey,
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
-			if v, ok := data.(*User); ok {
+			if v, ok := data.(*model.User); ok {
 				return jwt.MapClaims{
 					identityKey: v.UserName,
 				}
@@ -39,7 +42,7 @@ func SetUpAuth() (*jwt.GinJWTMiddleware, error) {
 		},
 		IdentityHandler: func(c *gin.Context) interface{} {
 			claims := jwt.ExtractClaims(c)
-			return &User{
+			return &model.User{
 				UserName: claims[identityKey].(string),
 			}
 		},
@@ -51,18 +54,20 @@ func SetUpAuth() (*jwt.GinJWTMiddleware, error) {
 			userID := loginVals.Username
 			password := loginVals.Password
 
-			if (userID == "admin" && password == "admin") || (userID == "test" && password == "test") {
-				return &User{
-					UserName:  userID,
-					LastName:  "Bo-Yi",
-					FirstName: "Wu",
-				}, nil
-			}
+			db := database.GetConnection()
 
-			return nil, jwt.ErrFailedAuthentication
+			user := &model.User{UserName: userID}
+			err1 := db.Select(user)
+			if err1 != nil {
+				panic(err1)
+			}
+			if err2 := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err2 != nil {
+				return nil, jwt.ErrFailedAuthentication
+			}
+			return &user, nil
 		},
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			if v, ok := data.(*User); ok && v.UserName == "admin" {
+			if v, ok := data.(*model.User); ok && v.UserName == "admin" {
 				return true
 			}
 

@@ -15,6 +15,7 @@ require (
 	github.com/mattn/go-isatty v0.0.11 // indirect
 	github.com/tidwall/gjson v1.4.0
 	go.uber.org/zap v1.13.0
+	golang.org/x/crypto v0.0.0-20191206172530-e9b2fee46413
 	golang.org/x/sys v0.0.0-20200116001909-b77594299b42 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect
 )

@@ -6,4 +6,5 @@ CREATE TABLE if not exists item
 )
 
 
-insert into item (title, post, stats) Values ('Item Two', 'Sports Post', '{"views": 250, "likes": 85}')
+insert into item (title, post, stats) Values ('Item Two', 'Sports Post', '{"views": 250, "likes": 85}');
+INSERT INTO public."user" (username, password) VALUES ('admin', crypt('admin', gen_salt('bf')));
