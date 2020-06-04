@@ -17,13 +17,6 @@ type login struct {
 	Password string `form:"password" json:"password" binding:"required"`
 }
 
-// User demo
-// type User struct {
-// 	UserName  string
-// 	FirstName string
-// 	LastName  string
-// }
-
 func SetUpAuth() (*jwt.GinJWTMiddleware, error) {
 	// the jwt middleware
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
