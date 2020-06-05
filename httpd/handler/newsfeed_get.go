@@ -36,6 +36,11 @@ func GetBitcoinAndSportsNews() gin.HandlerFunc {
 	}
 }
 
+// GetSportsNews godoc
+// @Summary Retrieves Sports News
+// @Produce json
+// @Success 200
+// @Router /sportsnews [get]
 func GetSportsNews() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
